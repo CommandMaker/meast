@@ -10,9 +10,10 @@ services:
       - .:/var/www/html
     networks:
       - web
-  phpfpm:
+  php:
     container_name: meast_php
-    image: php:8.0-fpm
+    build:
+      context: ./docker/images/php
     working_dir: /var/www/html
     expose:
       - 9000
@@ -32,9 +33,10 @@ services:
       - "3000:3000"
   composer:
     container_name: meast_composer
-    image: composer:latest
+    build:
+      context: ./docker/images/composer
     volumes:
-      - .:/app
+      - .:/usr/src/myapp
     command: bash -c "composer install && sleep infinity"
 
 volumes:
