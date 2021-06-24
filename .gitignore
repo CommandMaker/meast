@@ -1,3 +1,6 @@
+###> other ###
+node_modules/
+.idea/
 
 ###> symfony/framework-bundle ###
 /.env.local

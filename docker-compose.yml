@@ -1,0 +1,45 @@
+services:
+  web:
+    container_name: meast_web
+    build:
+      context: ./docker/images/apache
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+    networks:
+      - web
+  phpfpm:
+    container_name: meast_php
+    image: php:8.0-fpm
+    working_dir: /var/www/html
+    expose:
+      - 9000
+    volumes:
+      - .:/var/www/html
+    networks:
+      - web
+  dev_yarn:
+    container_name: meast_vitejs
+    build:
+      context: ./docker/images/yarn
+    command: bash -c "yarn && yarn dev"
+    working_dir: /var/www/
+    volumes:
+      - .:/var/www
+    ports:
+      - "3000:3000"
+  composer:
+    container_name: meast_composer
+    image: composer:latest
+    volumes:
+      - .:/app
+    command: bash -c "composer install && sleep infinity"
+
+volumes:
+  db_data: {}
+
+networks:
+  web:
+    driver: bridge
