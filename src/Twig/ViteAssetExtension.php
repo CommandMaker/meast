@@ -5,9 +5,9 @@ namespace App\Twig;
 
 
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
-use function dump;
 
 class ViteAssetExtension extends AbstractExtension
 {
@@ -18,8 +18,10 @@ class ViteAssetExtension extends AbstractExtension
         private bool $isDev,
         private string $manifest,
         private CacheItemPoolInterface $cache,
+        private RequestStack $stack
     )
     {
+
     }
 
     public function getFunctions (): array
@@ -40,19 +42,19 @@ class ViteAssetExtension extends AbstractExtension
     public function assetDev (string $entry, array $deps): string
     {
         $html = <<<HTML
-<script type="module" src="http://localhost:3000/assets/@vite/client"></script>
+<script type="module" src="http://{$this->stack->getCurrentRequest()->getHost()}:3000/assets/@vite/client"></script>
 HTML;
         if (in_array('react', $deps)) {
-            $html .= '<script type="module">
-                import RefreshRuntime from "http://localhost:3000/assets/@react-refresh"
+            $html .= "<script type=\"module\">
+                import RefreshRuntime from \"http://{$this->stack->getCurrentRequest()->getHost()}:3000/assets/@react-refresh\"
     RefreshRuntime.injectIntoGlobalHook(window)
-    window.$RefreshReg$ = () => {}
-    window.$RefreshSig$ = () => (type) => type
+    window.\$RefreshReg\$ = () => {}
+    window.\$RefreshSig\$ = () => (type) => type
     window.__vite_plugin_react_preamble_installed__ = true
-        </script>';
+        </script>";
         }
         $html .= <<<HTML
-<script type="module" src="http://localhost:3000/assets/{$entry}" defer></script>
+<script type="module" src="http://{$this->stack->getCurrentRequest()->getHost()}:3000/assets/$entry" defer></script>
 HTML;
         return $html;
     }
@@ -63,10 +65,8 @@ HTML;
             $item = $this->cache->getItem(self::CACHE_KEY);
             if ($item->isHit()) {
                 $this->manifestData = $item->get();
-                dump('reading cache');
             } else {
                 $this->manifestData = json_decode(file_get_contents($this->manifest), true);
-                dump('reading json');
                 $item->set($this->manifestData);
                 $this->cache->save($item);
             }
@@ -75,17 +75,17 @@ HTML;
         $css = $this->manifestData[$entry]['css'] ?? [];
         $imports = $this->manifestData[$entry]['imports'] ?? [];
         $html = <<<HTML
-<script type="module" src="/assets/{$file}" defer></script>
+<script type="module" src="/public/assets/{$file}" defer></script>
 HTML;
         foreach ($css as $cssFile) {
             $html .= <<<HTML
-<link rel="stylesheet" media="screen" href="/assets/{$cssFile}"/>
+<link rel="stylesheet" media="screen" href="/public/assets/{$cssFile}"/>
 HTML;
         }
 
         foreach ($imports as $import) {
             $html .= <<<HTML
-<link rel="modulepreload" href="/assets/{$import}"/>
+<link rel="modulepreload" href="/public/assets/{$import}"/>
 HTML;
         }
 

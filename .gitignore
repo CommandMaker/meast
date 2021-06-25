@@ -1,6 +1,8 @@
 ###> other ###
 node_modules/
 .idea/
+public/assets
+###< other ###
 
 ###> symfony/framework-bundle ###
 /.env.local

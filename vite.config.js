@@ -21,11 +21,6 @@ export default defineConfig({
   plugins: [reactRefresh(), twigRefreshPlugin],
   root: './assets',
   base: '/assets/',
-  server: {
-    watch: {
-      disableGlobbing: false // nécessaire pour le plugin twig
-    }
-  },
   build: {
     manifest: true,
     assetsDir: '',
@@ -35,7 +30,7 @@ export default defineConfig({
         manualChunks: undefined // On ne veut pas créer un fichier vendors, car on n'a ici qu'un point d'entré
       },
       input: {
-        'main.jsx': './assets/main.jsx'
+        'app.js': './assets/app.js'
       }
     }
   }
